@@ -14,7 +14,7 @@
 
     <property name="src.main.java.dir" value="src/main/java"/>
 	
-	<property name="m2Repository" value="../../../.m2/repository"/>	
+	<property name="m2Repository" value="/Users/mjmc/.m2/repository"/>
 	
     <!--.NET properties -->
     <property name="ikvm.dir" value="/Java/ikvm/ikvm-7.3.4830.0"/>

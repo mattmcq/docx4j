@@ -60,6 +60,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.jaxb.JAXBAssociation;
 import org.docx4j.jaxb.JaxbValidationEventHandler;
@@ -543,7 +544,8 @@ public class XmlUtils {
 			strB.append(wmlTemplateString.substring(offset, startKey));
 			int keyEnd = wmlTemplateString.indexOf(endVar, startKey);
 			String key = wmlTemplateString.substring(startKey + startVar.length(), keyEnd);
-			String val = mappings.get(key).toString();
+			String val = null;
+			if (!StringUtils.equals(key, "28A0092B-C50C-407E-A947-70E740481C1C")) val = mappings.get(key).toString();
 			if (val==null) {
 				log.warn("Invalid key '" + key + "' or key not mapped to a value");
 				strB.append(key);

@@ -22,6 +22,8 @@ package org.docx4j.openpackaging.packages;
 
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +44,7 @@ import org.docx4j.model.structure.DocumentModel;
 import org.docx4j.model.structure.HeaderFooterPolicy;
 import org.docx4j.model.structure.PageDimensions;
 import org.docx4j.model.structure.PageSizePaper;
+import org.docx4j.model.structure.SectionWrapper;
 import org.docx4j.openpackaging.contenttype.ContentType;
 import org.docx4j.openpackaging.contenttype.ContentTypeManager;
 import org.docx4j.openpackaging.contenttype.ContentTypes;
@@ -54,11 +57,16 @@ import org.docx4j.openpackaging.parts.JaxbXmlPart;
 import org.docx4j.openpackaging.parts.Part;
 import org.docx4j.openpackaging.parts.WordprocessingML.DocumentSettingsPart;
 import org.docx4j.openpackaging.parts.WordprocessingML.FontTablePart;
+import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
 import org.docx4j.openpackaging.parts.WordprocessingML.GlossaryDocumentPart;
+import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
+import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.CTSettings;
 import org.docx4j.wml.Document;
+import org.docx4j.wml.Ftr;
+import org.docx4j.wml.Hdr;
 import org.docx4j.wml.SectPr;
 import org.docx4j.wml.Styles;
 import org.slf4j.Logger;
@@ -218,12 +226,13 @@ public class WordprocessingMLPackage extends OpcPackage {
      * 
      * @param is
      * @param transformParameters
-     * @throws Exception
+	 * @throws Exception
      */    
     public void transform(Templates xslt,
-			  Map<String, Object> transformParameters) throws Exception {
+						  Map<String, Object> transformParameters) throws Exception {
 
-    	// Prepare in the input document
+
+		// Prepare in the input document
     	
 		FlatOpcXmlCreator worker = new FlatOpcXmlCreator(this);
 		org.docx4j.xmlPackage.Package pkg = worker.get();
@@ -255,7 +264,7 @@ public class WordprocessingMLPackage extends OpcPackage {
 		
 		Part tmpDocPart = xmlPackage.getRawPart(ctm,  "/word/document.xml", null);
 		Part tmpStylesPart = xmlPackage.getRawPart(ctm,  "/word/styles.xml", null);
-		
+
 		// This code assumes all the existing rels etc of 
 		// the existing main document part are still relevant.
 //		if (wmlDocument==null) {
@@ -263,18 +272,68 @@ public class WordprocessingMLPackage extends OpcPackage {
 //		} else {
 //			this.getMainDocumentPart().setJaxbElement(wmlDocument);
 //		}	
-		this.getMainDocumentPart().setJaxbElement(
-				((JaxbXmlPart<Document>) tmpDocPart).getJaxbElement() );
+		getMainDocumentPart().setJaxbElement(((JaxbXmlPart<Document>) tmpDocPart).getJaxbElement() );
 //				
 //		if (wmlStyles==null) {
 //			log.warn("Couldn't get style definitions part from package transform result!");			
 //		} else {
 //			this.getMainDocumentPart().getStyleDefinitionsPart().setJaxbElement(wmlStyles);
 //		}
-		this.getMainDocumentPart().getStyleDefinitionsPart(true).setJaxbElement(
-				((JaxbXmlPart<Styles>) tmpStylesPart).getJaxbElement() );
-    	
+
+
+		getMainDocumentPart().getStyleDefinitionsPart(true).setJaxbElement(((JaxbXmlPart<Styles>) tmpStylesPart).getJaxbElement() );
+
+
+		List<SectionWrapper> sectionWrappers = getDocumentModel().getSections();
+
+		HeaderPart headerPart;
+		FooterPart footerPart;
+		for (SectionWrapper sw : sectionWrappers) {
+			HeaderFooterPolicy hfp = sw.getHeaderFooterPolicy();
+			System.out.println("Header");
+
+			if (hfp.getFirstHeader()!=null) {
+				headerPart = hfp.getFirstHeader();
+				Part tmpHeaderPart3 = xmlPackage.getRawPart(ctm,  "/word/header3.xml", null);
+				System.out.println("first:" + headerPart.getPartName() + " " + headerPart);
+				headerPart.setJaxbElement(((JaxbXmlPart<Hdr>) tmpHeaderPart3).getJaxbElement());
+			}
+			if (hfp.getDefaultHeader()!=null){
+				headerPart = hfp.getDefaultHeader();
+				Part tmpHeaderPart2 = xmlPackage.getRawPart(ctm,  "/word/header2.xml", null);
+				System.out.println("default:" + headerPart.getPartName() + " " + headerPart);
+				headerPart.setJaxbElement(((JaxbXmlPart<Hdr>) tmpHeaderPart2).getJaxbElement());
+			}
+			if (hfp.getEvenHeader()!=null){
+				headerPart = hfp.getEvenHeader();
+				Part tmpHeaderPart1 = xmlPackage.getRawPart(ctm,  "/word/header1.xml", null);
+				System.out.println("even:" + headerPart.getPartName() + " " + headerPart);
+				headerPart.setJaxbElement(((JaxbXmlPart<Hdr>) tmpHeaderPart1).getJaxbElement());
+			}
+
+			if (hfp.getFirstFooter()!=null) {
+				footerPart = hfp.getFirstFooter();
+				Part tmpFooterPart3 = xmlPackage.getRawPart(ctm,  "/word/footer3.xml", null);
+				System.out.println("first:" + footerPart.getPartName() + " " + footerPart);
+				footerPart.setJaxbElement(((JaxbXmlPart<Ftr>) tmpFooterPart3).getJaxbElement());
+			}
+			if (hfp.getDefaultFooter()!=null){
+				footerPart = hfp.getDefaultFooter();
+				Part tmpFooterPart2 = xmlPackage.getRawPart(ctm,  "/word/footer2.xml", null);
+				System.out.println("default:" + footerPart.getPartName() + " " + footerPart);
+				footerPart.setJaxbElement(((JaxbXmlPart<Ftr>) tmpFooterPart2).getJaxbElement());
+			}
+			if (hfp.getEvenHeader()!=null){
+				footerPart = hfp.getEvenFooter();
+				Part tmpFooterPart1 = xmlPackage.getRawPart(ctm,  "/word/footer1.xml", null);
+				System.out.println("even:" + footerPart.getPartName() + " " + footerPart);
+				footerPart.setJaxbElement(((JaxbXmlPart<Ftr>) tmpFooterPart1).getJaxbElement());
+			}
+		}
     }
+
+
+
     
     @Deprecated
 	// since its questionable whether this

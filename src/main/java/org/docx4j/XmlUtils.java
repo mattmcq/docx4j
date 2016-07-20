@@ -545,7 +545,16 @@ public class XmlUtils {
 			int keyEnd = wmlTemplateString.indexOf(endVar, startKey);
 			String key = wmlTemplateString.substring(startKey + startVar.length(), keyEnd);
 			String val = null;
-			if (!StringUtils.equals(key, "28A0092B-C50C-407E-A947-70E740481C1C")) val = mappings.get(key).toString();
+
+			// get rid of xml
+			key = key.replaceAll("\\<[^>]*>","");
+			key = StringUtils.upperCase(key);
+
+			if (mappings.get(key) != null) {
+				if (!StringUtils.equals(key, "28A0092B-C50C-407E-A947-70E740481C1C"))
+					val = mappings.get(key).toString();
+			}
+
 			if (val==null) {
 				log.warn("Invalid key '" + key + "' or key not mapped to a value");
 				strB.append(key);

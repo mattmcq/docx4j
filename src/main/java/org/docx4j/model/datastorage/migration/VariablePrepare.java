@@ -24,6 +24,7 @@ package org.docx4j.model.datastorage.migration;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.io.SaveToZipFile;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
 import org.docx4j.utils.SingleTraversalUtilVisitorCallback;
 import org.docx4j.utils.TraversalUtilVisitor;
 import org.docx4j.wml.Body;
@@ -84,8 +85,8 @@ public class VariablePrepare {
 		// approach (which wouldn't involve marshal/unmarshall, and 
 		// so should be more efficient).
 
-        if(log.isInfoEnabled()) {
-            log.info(XmlUtils.marshaltoString(wmlPackage.getMainDocumentPart().getJaxbElement(), true, true));
+        if(log.isDebugEnabled()) {
+            log.debug(XmlUtils.marshaltoString(wmlPackage.getMainDocumentPart().getJaxbElement(), true, true));
         }
 		
 		// Now clean up some more
